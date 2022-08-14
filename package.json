@@ -6,7 +6,7 @@
   },
   "scripts": {
     "build": "tsc && yarn copyfiles",
-    "copyfiles": "copyfiles -u 1 \"src/templates/**\" dist",
+    "copyfiles": "copyfiles -u 1 \"src/{templates,collections}/**\" dist",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "jest",

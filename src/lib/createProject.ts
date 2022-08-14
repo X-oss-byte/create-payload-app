@@ -3,13 +3,12 @@ import chalk from 'chalk'
 import fse from 'fs-extra'
 import execa from 'execa'
 import ora from 'ora'
-import degit from 'degit'
 
 import { success, error, warning } from '../utils/log'
 import { setTags } from '../utils/usage'
-import type { CliArgs, ProjectTemplate } from '../types'
+import type { CliArgs } from '../types'
 
-async function createProjectDir(projectDir: string): Promise<void> {
+async function createProjectDir (projectDir: string): Promise<void> {
   const pathExists = await fse.pathExists(projectDir)
   if (pathExists) {
     error(`The project directory '${projectDir}' already exists`)
@@ -18,7 +17,7 @@ async function createProjectDir(projectDir: string): Promise<void> {
   await fse.mkdir(projectDir)
 }
 
-async function installDeps(
+async function installDeps (
   args: CliArgs,
   dir: string,
   packageManager: string,
@@ -38,7 +37,7 @@ async function installDeps(
   }
 }
 
-export async function getLatestPayloadVersion(
+export async function getLatestPayloadVersion (
   betaFlag = false,
 ): Promise<false | string> {
   try {
@@ -53,7 +52,7 @@ export async function getLatestPayloadVersion(
   }
 }
 
-export async function updatePayloadVersion(
+export async function updatePayloadVersion (
   projectDir: string,
   betaFlag = false,
 ): Promise<void> {
@@ -78,23 +77,66 @@ export async function updatePayloadVersion(
   }
 }
 
-export async function createProject(
+async function copyCollections (
+  projectDir: string,
+  language: string,
+  collections: string[]
+) {
+  // TODO: Collection options need to be expanded to support copying more than one file per choice
+  //  exmaple - Blog: [Categories, Tags, Posts]
+  const collectionTemplatesDir = path.resolve(__dirname, `../collections`)
+  const collectionsDir = path.resolve(projectDir, language === 'ts' ? 'src' : '', 'collections')
+
+  collections.forEach(async (collection) => {
+    await fse.copyFileSync(
+      path.resolve(`${collectionTemplatesDir}`, collection, `collection.${language}`),
+      path.resolve(collectionsDir, `${collection}.${language}`))
+  })
+}
+
+async function updatePayloadConfig (
+  projectDir: string,
+  language: string,
+  collections: string[],
+): Promise<void> {
+  const configPath = path.resolve(projectDir, language === 'ts' ? 'src' : '', `payload.config.${language}`)
+  const config = await fse.readFileSync(configPath, 'utf-8')
+
+  const updatedConfig = config
+    .replace(
+      '/*IMPORT_COLLECTIONS*/',
+      collections.map((collection) => (
+        `import ${collection} from './collections/${collection}';`)
+      ).join('\n')
+    ).replace(
+      '    /*COLLECTIONS*/',
+      collections.map((collection) => (`    ${collection},`))
+        .join('\n')
+    )
+
+  return fse.writeFileSync(configPath, updatedConfig)
+}
+
+export async function createProject (
   args: CliArgs,
   projectDir: string,
-  template: ProjectTemplate,
+  collections: string[],
+  language: string,
   packageManager: string,
 ): Promise<void> {
   await createProjectDir(projectDir)
-  const templateDir = path.resolve(__dirname, `../templates/${template.name}`)
+  // TODO: remove blank, rename dir
+  const templateDir = path.resolve(__dirname, `../templates/${language}-blank`)
 
   console.log(
     `\n  Creating a new Payload app in ${chalk.green(path.resolve(projectDir))}\n`,
   )
 
-  if (template.type === 'starter') {
-    const emitter = degit(template.url)
-    await emitter.clone(projectDir)
-  } else {
+  // TODO: decide if we're going to support cloning repos
+  // if (template.type === 'starter') {
+  //   const emitter = degit(template.url)
+  //   await emitter.clone(projectDir)
+  // } else {
     try {
       await fse.copy(templateDir, projectDir, { recursive: true })
       if (packageManager === 'npm') {
@@ -106,6 +148,9 @@ export async function createProject(
       const giDest = path.resolve(projectDir, '.gitignore')
       await fse.copy(gi, giDest)
 
+      await copyCollections(projectDir, language, collections)
+      await updatePayloadConfig(projectDir, language, collections)
+
       success('Project directory created')
     } catch (err) {
       const msg =
@@ -113,7 +158,7 @@ export async function createProject(
       error(msg)
       process.exit(1)
     }
-  }
+  // }
 
   const spinner = ora('Checking latest Payload version...').start()
   await updatePayloadVersion(projectDir, args['--beta'])

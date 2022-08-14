@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import figures from 'figures'
 import terminalLink from 'terminal-link'
-import { getValidTemplates } from '../lib/templates'
+import { getValidCollections } from '../lib/collections'
 
 const header = (message: string) =>
   chalk.yellow(figures.star) + ' ' + chalk.bold(message)
@@ -11,7 +11,7 @@ export const welcomeMessage = chalk`
 `
 
 export async function helpMessage(): Promise<string> {
-  const validTemplates = await getValidTemplates()
+  const collections = await getValidCollections()
   return chalk`
   {bold USAGE}
 
@@ -22,7 +22,7 @@ export async function helpMessage(): Promise<string> {
       --name {underline my-payload-app}              Set project name
       --template {underline template_name}           Choose specific template
 
-        {dim Available templates: ${validTemplates.map(t => t.name).join(', ')}}
+        {dim Available templates: ${collections.join(', ')}}
 
       --use-npm                          Use npm to install dependencies
       --no-deps                          Do not install any dependencies

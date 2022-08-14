@@ -24,7 +24,8 @@
     "node_modules",
     "dist",
     "build",
-    "src/templates"
+    "src/templates",
+    "src/collections"
   ],
   "ts-node": {
     "transpileOnly": true

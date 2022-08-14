@@ -30,8 +30,9 @@ describe('createProject', () => {
 
     it('creates static project', async () => {
       const expectedPayloadVersion = await getLatestPayloadVersion()
-      const template: ProjectTemplate = { name: 'ts-todo', type: 'static' }
-      await createProject(args, projectDir, template, packageManager)
+      const collections = ['Pages', 'Forms'];
+      const language = 'ts'
+      await createProject(args, projectDir, collections, language, packageManager)
 
       const packageJsonPath = path.resolve(projectDir, 'package.json')
       const packageJson = fse.readJsonSync(packageJsonPath)

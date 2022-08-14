@@ -3,7 +3,8 @@ import type arg from 'arg'
 export type Args = {
   '--help': BooleanConstructor
   '--name': StringConstructor
-  '--template': StringConstructor
+  '--language': StringConstructor
+  '--collections': StringConstructor
   '--db': StringConstructor
   '--secret': StringConstructor
   '--use-npm': BooleanConstructor

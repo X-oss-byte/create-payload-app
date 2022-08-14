@@ -10,6 +10,8 @@ CLI for easily starting new Payload project
 
       $ npx create-payload-app
 
+TODO: update options 
+
   OPTIONS
 
       --name my-payload-app              Set project name

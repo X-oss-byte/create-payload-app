@@ -2,7 +2,7 @@ import prompts from 'prompts'
 import type { CliArgs } from '../types'
 
 export async function parseLanguage(args: CliArgs): Promise<string> {
-  if (args['--template']) return args['--template']
+  if (args['--language']) return args['--language']
 
   const response = await prompts(
     {

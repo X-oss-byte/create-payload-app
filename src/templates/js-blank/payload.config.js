@@ -1,6 +1,6 @@
 import { buildConfig } from 'payload/config';
-import Examples from './collections/Examples';
 import Users from './collections/Users';
+/*IMPORT_COLLECTIONS*/
 
 export default buildConfig({
   serverURL: 'http://localhost:3000',
@@ -9,7 +9,6 @@ export default buildConfig({
   },
   collections: [
     Users,
-    // Add Collections here
-    // Examples
+    /*COLLECTIONS*/
   ],
 });
